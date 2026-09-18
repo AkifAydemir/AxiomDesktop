@@ -40,6 +40,22 @@ the command's session-scoped execution diagnostics.*
 - Redacted support bundles and execution diagnostics.
 - 30 registered CTest targets plus a Windows release-evidence verifier.
 
+## How it is built
+
+Axiom is a resident Win32 application rather than a web interface in a desktop
+wrapper. The tray and single-instance lifecycle keep one process available;
+`Alt+Space` opens a palette that routes typed commands through an action
+registry. Search, local records, reminders, automation, plugins, and diagnostics
+remain distinct subsystems behind that common entry point.
+
+The less visible work is recovery and trust. File indexing does not assume
+that every filesystem notification arrives: watcher loss can trigger a
+generation-guarded rescan. Local archive/restore uses atomic transactions and
+CurrentUser DPAPI protection where enabled. A plugin's manifest, requested
+capabilities, package hash, and local trust decision are checked before loading
+native code. These measures make failures and trust choices inspectable, but
+they do not turn in-process plugins into a security sandbox.
+
 ## Architecture
 
 ```mermaid

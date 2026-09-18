@@ -28,6 +28,22 @@ gerçek ekran görüntüsü. Palet, komutun oturuma özgü yürütme tanıların
 - Özel alanları varsayılan olarak maskeleyen destek paketleri ve yürütme tanıları.
 - 30 kayıtlı CTest hedefi ve Windows release kanıtı doğrulayıcısı.
 
+## Nasıl kuruldu?
+
+Axiom, masaüstü kabuğuna alınmış bir web arayüzü değil, arka planda çalışan
+bir Win32 uygulamasıdır. Tray ve tek-instance yaşam döngüsü tek bir süreci
+hazır tutar; `Alt+Space` paleti yazılan komutları action registry üzerinden
+yönlendirir. Arama, yerel kayıtlar, hatırlatmalar, otomasyon, plugin’ler ve
+tanılar bu ortak giriş noktasının arkasında ayrı alt sistemlerdir.
+
+Görünmeyen işin önemli kısmı toparlanma ve güvendir. Dosya indeksi her
+filesystem bildiriminin ulaşacağını varsaymaz; watcher kaybında generation
+korumalı yeniden tarama yapılabilir. Yerel arşiv/restore, atomik işlemler ve
+etkinleştirildiğinde CurrentUser DPAPI koruması kullanır. Native kod
+yüklenmeden önce plugin manifest’i, istenen capability’ler, paket hash’i ve
+yerel güven kararı değerlendirilir. Bunlar hata ve güven sınırlarını
+görünür kılar; process içinde çalışan plugin’ler için sandbox oluşturmaz.
+
 ## Mimari
 
 ```mermaid
