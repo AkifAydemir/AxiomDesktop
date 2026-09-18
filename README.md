@@ -78,6 +78,44 @@ flowchart TD
 See [Architecture](docs/ARCHITECTURE.md) for subsystem boundaries and failure
 handling.
 
+## What happens in a real session
+
+Axiom starts as a single resident Windows process. Its notification-area icon
+keeps the tool reachable without leaving a full window open. `Alt+Space`, tray
+activation, or a second-instance handoff reveals the same palette. Typing a
+command selects an entry from the action registry; the palette then presents
+that action's result rather than owning each subsystem's business logic.
+`diag status` is a small, safe way to inspect this path: it reports bounded,
+session-scoped executor counts without persisting action payloads.
+
+File search has a separate reliability problem. The index consumes incremental
+Windows filesystem notifications, but notifications can be lost or overflow.
+Watcher health records that condition and requests a rescan. Generation guards
+prevent an old scan from clearing a newer recovery request. That choice matters
+for a long-running command palette: returning stale search results as if the
+index were healthy would be more misleading than acknowledging recovery.
+
+Persistence and plugins have similarly explicit boundaries. Clipboard,
+journal, reminder, automation, settings, and trust data stay local. Archive
+restore records its intent so startup can roll back unfinished work or finish
+cleanup after an interrupted commit; optional CurrentUser DPAPI protection is
+tied to the Windows user, not portable across accounts. A native plugin first
+passes manifest, ABI, capability, hash, and local trust checks. It still runs
+inside Axiom's process, so the documented trust decision is important: this is
+not arbitrary-code isolation.
+
+### Where to read the implementation
+
+| File | What to inspect |
+| --- | --- |
+| [`src/axiom.cpp`](src/axiom.cpp) | Win32 palette, tray, hotkey, and single-instance shell. |
+| [`src/action_registry.cpp`](src/action_registry.cpp) | Shared command registration and dispatch boundary. |
+| [`src/file_index.cpp`](src/file_index.cpp) | Searchable file metadata and index updates. |
+| [`src/watcher_resync.cpp`](src/watcher_resync.cpp) and [`src/index_scan_gate.cpp`](src/index_scan_gate.cpp) | Watcher recovery and stale-scan guards. |
+| [`src/restore_transaction.cpp`](src/restore_transaction.cpp) | Interrupted restore transaction handling. |
+| [`src/plugin_host.cpp`](src/plugin_host.cpp) | Native plugin lifecycle and trust boundary. |
+| [`tests/watcher_resync_tests.cpp`](tests/watcher_resync_tests.cpp) | A concrete recovery regression test. |
+
 ## A 60-second product tour
 
 1. Start `Axiom.exe` and press `Alt+Space`. Type `?` to browse the command

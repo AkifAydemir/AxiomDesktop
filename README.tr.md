@@ -65,6 +65,44 @@ flowchart TD
 
 Alt sistem sınırları ve hata yönetimi için [mimari notlarına](docs/ARCHITECTURE.md) bakın.
 
+## Gerçek bir oturumda ne oluyor?
+
+Axiom, Windows’ta arka planda duran tek bir process olarak başlar. Bildirim
+alanındaki simgesi, sürekli tam pencere açık tutmadan uygulamaya erişim sağlar.
+`Alt+Space`, tray veya ikinci bir instance’ın devri aynı paleti açar. Yazılan
+komut action registry’deki bir kaydı seçer; palet her alt sistemin iş mantığını
+üstlenmek yerine komutun sonucunu gösterir. `diag status` bu yolu güvenli
+biçimde incelemek için küçük bir örnektir: action payload’larını saklamadan,
+oturuma özgü ve sınırlandırılmış yürütme sayaçlarını gösterir.
+
+Dosya aramanın ayrı bir güvenilirlik sorunu vardır. İndeks, Windows’un artımlı
+filesystem bildirimlerini tüketir; ancak bildirimler kaybolabilir veya taşabilir.
+Watcher sağlığı bu durumu kaydedip yeniden tarama ister. Generation korumaları,
+eski bir taramanın daha yeni bir toparlanma isteğini silmesini engeller. Uzun
+süre çalışan bir palette bu önemlidir: eskimiş arama sonucunu indeks sağlıklıymış
+gibi sunmak yerine toparlanma durumunu bilmek gerekir.
+
+Kalıcı veri ve plugin’lerin sınırları da açıktır. Clipboard, journal,
+hatırlatma, otomasyon, ayar ve güven verileri yerelde kalır. Arşiv restore
+işlemi niyetini kaydeder; böylece açılışta yarım işi geri alabilir veya
+kesintiye uğramış commit sonrası temizliği bitirebilir. İsteğe bağlı
+CurrentUser DPAPI koruması Windows kullanıcısına bağlıdır, hesaplar arasında
+taşınabilir değildir. Native plugin önce manifest, ABI, capability, hash ve
+yerel güven kontrollerinden geçer. Yine de Axiom process’i içinde çalışır;
+bu nedenle belgelenen güven kararı önemlidir, bu bir kod yalıtımı değildir.
+
+### Kodu nereden okumalı?
+
+| Dosya | İncelenecek konu |
+| --- | --- |
+| [`src/axiom.cpp`](src/axiom.cpp) | Win32 palet, tray, hotkey ve tek-instance kabuğu. |
+| [`src/action_registry.cpp`](src/action_registry.cpp) | Ortak komut kaydı ve yönlendirme sınırı. |
+| [`src/file_index.cpp`](src/file_index.cpp) | Aranabilir dosya metadata’sı ve indeks güncellemeleri. |
+| [`src/watcher_resync.cpp`](src/watcher_resync.cpp) ve [`src/index_scan_gate.cpp`](src/index_scan_gate.cpp) | Watcher toparlanması ve eski tarama korumaları. |
+| [`src/restore_transaction.cpp`](src/restore_transaction.cpp) | Kesintiye uğramış restore işlemleri. |
+| [`src/plugin_host.cpp`](src/plugin_host.cpp) | Native plugin yaşam döngüsü ve güven sınırı. |
+| [`tests/watcher_resync_tests.cpp`](tests/watcher_resync_tests.cpp) | Somut bir toparlanma regresyon testi. |
+
 ## 60 saniyelik ürün turu
 
 1. `Axiom.exe` dosyasını başlatıp `Alt+Space` ile paleti açın. Komut kataloğu için `?` yazın.
