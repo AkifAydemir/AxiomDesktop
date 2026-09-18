@@ -1,0 +1,76 @@
+AXIOM-WINDOWS-VERIFICATION v1
+product-version=0.16.0
+all-gates-pass=1
+gate-count=8
+
+[gate]
+id=msvc-release-build
+state=pass
+observed-at-utc=2026-09-07T00:14:05Z
+toolchain=Visual Studio 2022 Community 17.14.39; MSVC 19.44.35228 x64; Windows SDK 10.0.26100.0; CMake VS17 x64 Release
+evidence=Clean Release rebuild succeeded without warnings; final CTest 30/30 passed.
+procedure=Configure with Visual Studio 17 2022 x64, build Release, then run CTest -C Release with --output-on-failure.
+pass-criteria=Release configure/build succeeds with MSVC and Windows SDK; all registered Release tests pass.
+
+[gate]
+id=axiom-lifecycle
+state=pass
+observed-at-utc=2026-09-07T00:14:05Z
+toolchain=Visual Studio 2022 Community 17.14.39; MSVC 19.44.35228 x64; Windows SDK 10.0.26100.0; CMake VS17 x64 Release
+evidence=Final integrated gate: native Axiom.exe activation, hotkey hide/show, inactive hide, tray activation, single-instance handoff, WM_TIMECHANGE survival, clean exit, and restart passed.
+procedure=Launch Axiom.exe, exercise single-instance activation, Alt+Space palette, tray hide/show, and clean exit/restart.
+pass-criteria=No startup error, duplicate live instance, stuck tray state, or shutdown/restart failure is observed.
+
+[gate]
+id=sample-plugin-lifecycle
+state=pass
+observed-at-utc=2026-09-07T00:14:05Z
+toolchain=Visual Studio 2022 Community 17.14.39; MSVC 19.44.35228 x64; Windows SDK 10.0.26100.0; CMake VS17 x64 Release
+evidence=Final integrated gate: sample manifest/DLL install, SHA-256 trust, enable/load/invoke/unload/reload/disable/remove passed.
+procedure=Build AxiomHelloPlugin.dll, install/enable the sample package, invoke hello/hello-action, then disable/reload/remove while callbacks are idle.
+pass-criteria=Manifest/hash/capability checks pass, callbacks execute, and unload/reload/remove complete without stale registry visibility or crash.
+
+[gate]
+id=current-user-dpapi-roundtrip
+state=pass
+observed-at-utc=2026-09-07T00:14:05Z
+toolchain=Visual Studio 2022 Community 17.14.39; MSVC 19.44.35228 x64; Windows SDK 10.0.26100.0; CMake VS17 x64 Release
+evidence=Final integrated gate: CurrentUser DPAPI JournalStore and LocalDataArchive round-trip across child restart and corrupt-input fail-closed passed.
+procedure=Under the same Windows user, exercise protected live journal plus protected backup/inspect/restore across an application restart.
+pass-criteria=Protected data decrypts after restart for the same CurrentUser, payload round-trips losslessly, and incompatible/corrupt candidates fail closed.
+
+[gate]
+id=watcher-overflow-resync
+state=pass
+observed-at-utc=2026-09-07T00:14:05Z
+toolchain=Visual Studio 2022 Community 17.14.39; MSVC 19.44.35228 x64; Windows SDK 10.0.26100.0; CMake VS17 x64 Release
+evidence=Final integrated gate: real ReadDirectoryChangesW zero-byte loss and invalid-handle error drove exact-generation resync/restart and stale-generation rejection.
+procedure=Exercise real ReadDirectoryChangesW notification loss/overflow and a generic watcher error, then observe restart/resync state and exact-generation full scan completion.
+pass-criteria=Overflow requires full resync; generic error requires successful watcher restart plus full resync; stale generations cannot clear newer health state.
+
+[gate]
+id=wm-timechange-dst
+state=pass
+observed-at-utc=2026-09-07T00:14:05Z
+toolchain=Visual Studio 2022 Community 17.14.39; MSVC 19.44.35228 x64; Windows SDK 10.0.26100.0; CMake VS17 x64 Release
+evidence=Final integrated WM_TIMECHANGE lifecycle passed; AXIOM_REQUIRE_DST=1 gap/fallback test passed under Eastern Standard Time; original Turkey Standard Time restored.
+procedure=With local-calendar automations armed, exercise Windows local time/time-zone change and DST gap/ambiguity scenarios while the app is running and across restart.
+pass-criteria=WM_TIMECHANGE triggers rebase; spring-forward gaps are skipped; fall-back ambiguity resolves once; active retry timer semantics remain intact.
+
+[gate]
+id=axrt1-restart-recovery
+state=pass
+observed-at-utc=2026-09-07T00:14:05Z
+toolchain=Visual Studio 2022 Community 17.14.39; MSVC 19.44.35228 x64; Windows SDK 10.0.26100.0; CMake VS17 x64 Release
+evidence=Final integrated gate: AXRT1 uncommitted, committed, and forged journals passed child-process restart recovery.
+procedure=Interrupt a multi-file restore at controlled pre-commit and committed-cleanup phases, restart Axiom, and inspect startup recovery before settings/stores load.
+pass-criteria=Uncommitted work rolls back, committed work is preserved, forged/suspicious artifacts fail closed, and recovery finishes before store reads.
+
+[gate]
+id=support-bundle-win32-publish
+state=pass
+observed-at-utc=2026-09-07T00:14:05Z
+toolchain=Visual Studio 2022 Community 17.14.39; MSVC 19.44.35228 x64; Windows SDK 10.0.26100.0; CMake VS17 x64 Release
+evidence=Final integrated gate: Win32 support bundle redaction, opt-in, replacement, and failed-publication cleanup passed.
+procedure=Create support bundles on Windows with default redaction and explicit opt-ins while observing CreateFileW/FlushFileBuffers/MoveFileExW publication behavior.
+pass-criteria=Unique exclusive temporary creation, durable flush, atomic replacement, cleanup-on-failure and privacy/redaction contracts hold on the real Windows filesystem.

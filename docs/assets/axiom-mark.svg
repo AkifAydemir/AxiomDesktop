@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title id="title">Axiom Desktop mark</title>
+  <desc id="desc">A command prompt centered inside a local desktop hub.</desc>
+  <defs>
+    <linearGradient id="axiom" x1="27" y1="25" x2="137" y2="139" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2DD4BF"/>
+      <stop offset="1" stop-color="#38BDF8"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="148" height="148" rx="34" fill="#07151A"/>
+  <circle cx="80" cy="80" r="49" fill="none" stroke="url(#axiom)" stroke-width="8"/>
+  <path d="M80 21v16M80 123v16M21 80h16M123 80h16" stroke="#94A3B8" stroke-width="6" stroke-linecap="round"/>
+  <rect x="48" y="53" width="64" height="54" rx="12" fill="#0F2930" stroke="#F8FAFC" stroke-width="5"/>
+  <path d="m63 71 10 9-10 9M82 90h16" fill="none" stroke="url(#axiom)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

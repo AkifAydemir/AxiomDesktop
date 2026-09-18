@@ -1,0 +1,6 @@
+id=axiom.sample.hello
+name=Axiom Hello Plugin
+version=1.0.0
+library=AxiomHelloPlugin.dll
+abi=65536
+capabilities=actions,commands

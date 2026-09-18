@@ -1,0 +1,33 @@
+#include "resource.h"
+#include <windows.h>
+
+IDR_AXIOM_VERSION VERSIONINFO
+    FILEVERSION 0,16,0,0
+    PRODUCTVERSION 0,16,0,0
+    FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+#ifdef _DEBUG
+    FILEFLAGS VS_FF_DEBUG
+#else
+    FILEFLAGS 0x0L
+#endif
+    FILEOS VOS_NT_WINDOWS32
+    FILETYPE VFT_APP
+    FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "FileDescription", "Axiom Desktop - Local-first Windows command center\0"
+            VALUE "FileVersion", "0.16.0.0\0"
+            VALUE "InternalName", "Axiom\0"
+            VALUE "OriginalFilename", "Axiom.exe\0"
+            VALUE "ProductName", "Axiom Desktop\0"
+            VALUE "ProductVersion", "0.16.0\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END

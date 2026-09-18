@@ -1,0 +1,42 @@
+name: Windows CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: windows-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Configure
+        run: cmake -S . -B build -A x64
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Verify release payload
+        shell: pwsh
+        run: |
+          $required = @(
+            'build/Release/Axiom.exe',
+            'build/Release/AxiomWindowsVerification.exe',
+            'build/Release/AxiomHelloPlugin.dll',
+            'build/Release/hello.axp'
+          )
+          $missing = @($required | Where-Object { -not (Test-Path -LiteralPath $_) })
+          if ($missing.Count -ne 0) {
+            throw "Missing release artifacts: $($missing -join ', ')"
+          }

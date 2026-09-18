@@ -1,0 +1,304 @@
+cmake_minimum_required(VERSION 3.24)
+project(AxiomDesktop VERSION 0.16.0 LANGUAGES CXX)
+option(AXIOM_BUILD_BENCHMARKS "Build Axiom portable benchmark targets" ON)
+function(axiom_enable_warnings target)
+target_compile_options(${target} PRIVATE
+$<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /EHsc /utf-8>
+$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
+)
+endfunction()
+add_library(AxiomReminders STATIC
+src/reminder_store.cpp
+)
+target_include_directories(AxiomReminders PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomReminders PUBLIC cxx_std_20)
+axiom_enable_warnings(AxiomReminders)
+add_library(AxiomRuntime STATIC
+src/runtime.cpp
+)
+target_include_directories(AxiomRuntime PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomRuntime PUBLIC cxx_std_20)
+axiom_enable_warnings(AxiomRuntime)
+target_link_libraries(AxiomRuntime PUBLIC AxiomReminders)
+add_library(AxiomIndex STATIC
+src/index_scan_gate.cpp
+src/file_index.cpp
+)
+target_include_directories(AxiomIndex PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomIndex PUBLIC cxx_std_20)
+axiom_enable_warnings(AxiomIndex)
+add_library(AxiomWatcherRecovery STATIC
+src/watcher_health.cpp
+src/watcher_resync.cpp
+)
+target_include_directories(AxiomWatcherRecovery PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomWatcherRecovery PUBLIC cxx_std_20)
+axiom_enable_warnings(AxiomWatcherRecovery)
+add_library(AxiomClipboard STATIC
+src/clipboard_store.cpp
+)
+target_include_directories(AxiomClipboard PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomClipboard PUBLIC cxx_std_20)
+axiom_enable_warnings(AxiomClipboard)
+add_library(AxiomSettings STATIC
+src/app_settings.cpp
+)
+target_include_directories(AxiomSettings PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomSettings PUBLIC cxx_std_20)
+axiom_enable_warnings(AxiomSettings)
+add_library(AxiomDiagnostics STATIC
+src/execution_diagnostics.cpp
+src/support_bundle.cpp
+)
+target_include_directories(AxiomDiagnostics PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomDiagnostics PUBLIC cxx_std_20)
+axiom_enable_warnings(AxiomDiagnostics)
+add_library(AxiomActions STATIC
+src/action_registry.cpp
+)
+target_include_directories(AxiomActions PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomActions PUBLIC cxx_std_20)
+axiom_enable_warnings(AxiomActions)
+target_link_libraries(AxiomActions PUBLIC AxiomDiagnostics)
+add_library(AxiomAutomations STATIC
+src/automation_schedule.cpp
+src/automation_store.cpp
+src/automation_engine.cpp
+)
+target_include_directories(AxiomAutomations PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomAutomations PUBLIC cxx_std_20)
+axiom_enable_warnings(AxiomAutomations)
+target_link_libraries(AxiomAutomations PUBLIC AxiomActions AxiomRuntime)
+add_library(AxiomJournal STATIC
+src/journal_store.cpp
+src/journal_transfer.cpp
+)
+target_include_directories(AxiomJournal PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomJournal PUBLIC cxx_std_20)
+axiom_enable_warnings(AxiomJournal)
+add_library(AxiomLocalData STATIC
+src/restore_transaction.cpp
+src/startup_restore_recovery.cpp
+src/local_data_archive.cpp
+)
+target_include_directories(AxiomLocalData PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomLocalData PUBLIC cxx_std_20)
+axiom_enable_warnings(AxiomLocalData)
+if(WIN32)
+target_link_libraries(AxiomLocalData PUBLIC crypt32)
+endif()
+target_link_libraries(AxiomJournal PUBLIC AxiomLocalData)
+add_library(AxiomPlugins STATIC
+src/sha256.cpp
+src/plugin_manifest.cpp
+src/plugin_trust_store.cpp
+src/plugin_package.cpp
+src/plugin_host.cpp
+)
+target_include_directories(AxiomPlugins PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomPlugins PUBLIC cxx_std_20)
+axiom_enable_warnings(AxiomPlugins)
+target_link_libraries(AxiomPlugins PUBLIC AxiomActions)
+add_library(AxiomReleaseVerification STATIC
+src/release_verification.cpp
+)
+target_include_directories(AxiomReleaseVerification PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomReleaseVerification PUBLIC cxx_std_20)
+axiom_enable_warnings(AxiomReleaseVerification)
+add_executable(AxiomWindowsVerification tools/windows_verification.cpp)
+target_link_libraries(AxiomWindowsVerification PRIVATE AxiomReleaseVerification)
+target_compile_features(AxiomWindowsVerification PRIVATE cxx_std_20)
+axiom_enable_warnings(AxiomWindowsVerification)
+add_library(AxiomNotifications STATIC
+src/notification_center.cpp
+)
+target_include_directories(AxiomNotifications PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomNotifications PUBLIC cxx_std_20)
+axiom_enable_warnings(AxiomNotifications)
+if(WIN32)
+add_executable(Axiom WIN32
+src/main.cpp
+src/axiom.cpp
+src/axiom.rc
+src/filesystem_watcher.cpp
+src/system_metrics.cpp
+src/plugin_loader_win32.cpp
+)
+target_compile_features(Axiom PRIVATE cxx_std_20)
+target_compile_definitions(Axiom PRIVATE
+UNICODE
+_UNICODE
+WIN32_LEAN_AND_MEAN
+NOMINMAX
+_WIN32_WINNT=0x0A00
+)
+axiom_enable_warnings(Axiom)
+target_link_libraries(Axiom PRIVATE
+AxiomIndex
+AxiomWatcherRecovery
+AxiomClipboard
+AxiomSettings
+AxiomNotifications
+AxiomJournal
+AxiomLocalData
+AxiomActions
+AxiomDiagnostics
+AxiomPlugins
+AxiomAutomations
+AxiomRuntime
+AxiomReminders
+user32
+gdi32
+shell32
+ole32
+comctl32
+iphlpapi
+ws2_32
+psapi
+advapi32
+crypt32
+)
+set_target_properties(Axiom PROPERTIES OUTPUT_NAME "Axiom")
+add_library(AxiomHelloPlugin MODULE samples/hello_plugin/hello_plugin.cpp)
+target_include_directories(AxiomHelloPlugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(AxiomHelloPlugin PRIVATE cxx_std_20)
+axiom_enable_warnings(AxiomHelloPlugin)
+set_target_properties(AxiomHelloPlugin PROPERTIES PREFIX "" OUTPUT_NAME "AxiomHelloPlugin")
+add_custom_command(TARGET AxiomHelloPlugin POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy_if_different
+${CMAKE_CURRENT_SOURCE_DIR}/samples/hello_plugin/hello.axp
+$<TARGET_FILE_DIR:AxiomHelloPlugin>/hello.axp
+)
+else()
+message(STATUS "Axiom desktop executable is Windows-only; building portable core targets.")
+endif()
+include(CTest)
+if(BUILD_TESTING)
+add_executable(AxiomIndexTests tests/file_index_tests.cpp)
+target_link_libraries(AxiomIndexTests PRIVATE AxiomIndex)
+add_test(NAME AxiomIndexTests COMMAND AxiomIndexTests)
+add_executable(AxiomIndexScanGateTests tests/index_scan_gate_tests.cpp)
+target_link_libraries(AxiomIndexScanGateTests PRIVATE AxiomIndex)
+add_test(NAME AxiomIndexScanGateTests COMMAND AxiomIndexScanGateTests)
+add_executable(AxiomWatcherHealthTests tests/watcher_health_tests.cpp)
+target_link_libraries(AxiomWatcherHealthTests PRIVATE AxiomWatcherRecovery)
+add_test(NAME AxiomWatcherHealthTests COMMAND AxiomWatcherHealthTests)
+add_executable(AxiomWatcherResyncTests tests/watcher_resync_tests.cpp)
+target_link_libraries(AxiomWatcherResyncTests PRIVATE AxiomWatcherRecovery)
+add_test(NAME AxiomWatcherResyncTests COMMAND AxiomWatcherResyncTests)
+add_executable(AxiomWatcherWin32ContractTests tests/watcher_win32_contract_tests.cpp)
+target_compile_definitions(AxiomWatcherWin32ContractTests PRIVATE AXIOM_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+target_compile_features(AxiomWatcherWin32ContractTests PRIVATE cxx_std_20)
+axiom_enable_warnings(AxiomWatcherWin32ContractTests)
+add_test(NAME AxiomWatcherWin32ContractTests COMMAND AxiomWatcherWin32ContractTests)
+add_executable(AxiomClipboardTests tests/clipboard_store_tests.cpp)
+target_link_libraries(AxiomClipboardTests PRIVATE AxiomClipboard)
+add_test(NAME AxiomClipboardTests COMMAND AxiomClipboardTests)
+add_executable(AxiomAppSettingsTests tests/app_settings_tests.cpp)
+target_link_libraries(AxiomAppSettingsTests PRIVATE AxiomSettings)
+add_test(NAME AxiomAppSettingsTests COMMAND AxiomAppSettingsTests)
+add_executable(AxiomNotificationCenterTests tests/notification_center_tests.cpp)
+target_link_libraries(AxiomNotificationCenterTests PRIVATE AxiomNotifications)
+add_test(NAME AxiomNotificationCenterTests COMMAND AxiomNotificationCenterTests)
+add_executable(AxiomLocalDataArchiveTests tests/local_data_archive_tests.cpp)
+target_link_libraries(AxiomLocalDataArchiveTests PRIVATE AxiomLocalData)
+add_test(NAME AxiomLocalDataArchiveTests COMMAND AxiomLocalDataArchiveTests)
+add_executable(AxiomRestoreTransactionTests tests/restore_transaction_tests.cpp)
+target_link_libraries(AxiomRestoreTransactionTests PRIVATE AxiomLocalData)
+add_test(NAME AxiomRestoreTransactionTests COMMAND AxiomRestoreTransactionTests)
+add_executable(AxiomStartupRestoreRecoveryTests tests/startup_restore_recovery_tests.cpp)
+target_link_libraries(AxiomStartupRestoreRecoveryTests PRIVATE AxiomLocalData)
+add_test(NAME AxiomStartupRestoreRecoveryTests COMMAND AxiomStartupRestoreRecoveryTests)
+add_executable(AxiomJournalTransferTests tests/journal_transfer_tests.cpp)
+target_link_libraries(AxiomJournalTransferTests PRIVATE AxiomJournal)
+add_test(NAME AxiomJournalTransferTests COMMAND AxiomJournalTransferTests)
+add_executable(AxiomJournalStoreTests tests/journal_store_tests.cpp)
+target_link_libraries(AxiomJournalStoreTests PRIVATE AxiomJournal)
+add_test(NAME AxiomJournalStoreTests COMMAND AxiomJournalStoreTests)
+add_executable(AxiomActionRegistryTests tests/action_registry_tests.cpp)
+target_link_libraries(AxiomActionRegistryTests PRIVATE AxiomActions)
+add_test(NAME AxiomActionRegistryTests COMMAND AxiomActionRegistryTests)
+add_executable(AxiomAutomationStoreTests tests/automation_store_tests.cpp)
+target_link_libraries(AxiomAutomationStoreTests PRIVATE AxiomAutomations)
+add_test(NAME AxiomAutomationStoreTests COMMAND AxiomAutomationStoreTests)
+add_executable(AxiomAutomationScheduleTests tests/automation_schedule_tests.cpp)
+target_link_libraries(AxiomAutomationScheduleTests PRIVATE AxiomAutomations)
+add_test(NAME AxiomAutomationScheduleTests COMMAND AxiomAutomationScheduleTests)
+add_executable(AxiomAutomationEngineTests tests/automation_engine_tests.cpp)
+target_link_libraries(AxiomAutomationEngineTests PRIVATE AxiomAutomations AxiomActions AxiomRuntime)
+add_test(NAME AxiomAutomationEngineTests COMMAND AxiomAutomationEngineTests)
+add_executable(AxiomPluginManifestTests tests/plugin_manifest_tests.cpp)
+target_link_libraries(AxiomPluginManifestTests PRIVATE AxiomPlugins)
+add_test(NAME AxiomPluginManifestTests COMMAND AxiomPluginManifestTests)
+add_executable(AxiomPluginHostTests tests/plugin_host_tests.cpp)
+target_link_libraries(AxiomPluginHostTests PRIVATE AxiomPlugins)
+add_test(NAME AxiomPluginHostTests COMMAND AxiomPluginHostTests)
+add_executable(AxiomSha256Tests tests/sha256_tests.cpp)
+target_link_libraries(AxiomSha256Tests PRIVATE AxiomPlugins)
+add_test(NAME AxiomSha256Tests COMMAND AxiomSha256Tests)
+add_executable(AxiomPluginTrustStoreTests tests/plugin_trust_store_tests.cpp)
+target_link_libraries(AxiomPluginTrustStoreTests PRIVATE AxiomPlugins)
+add_test(NAME AxiomPluginTrustStoreTests COMMAND AxiomPluginTrustStoreTests)
+add_executable(AxiomPluginPackageTests tests/plugin_package_tests.cpp)
+target_link_libraries(AxiomPluginPackageTests PRIVATE AxiomPlugins)
+add_test(NAME AxiomPluginPackageTests COMMAND AxiomPluginPackageTests)
+add_executable(AxiomSourceContractTests tests/source_contract_tests.cpp)
+target_compile_definitions(AxiomSourceContractTests PRIVATE AXIOM_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+target_compile_features(AxiomSourceContractTests PRIVATE cxx_std_20)
+axiom_enable_warnings(AxiomSourceContractTests)
+add_test(NAME AxiomSourceContractTests COMMAND AxiomSourceContractTests)
+add_executable(AxiomExecutionDiagnosticsTests tests/execution_diagnostics_tests.cpp)
+target_link_libraries(AxiomExecutionDiagnosticsTests PRIVATE AxiomDiagnostics)
+add_test(NAME AxiomExecutionDiagnosticsTests COMMAND AxiomExecutionDiagnosticsTests)
+add_executable(AxiomSupportBundleTests tests/support_bundle_tests.cpp)
+target_link_libraries(AxiomSupportBundleTests PRIVATE AxiomDiagnostics)
+add_test(NAME AxiomSupportBundleTests COMMAND AxiomSupportBundleTests)
+add_executable(AxiomReleaseVerificationTests tests/release_verification_tests.cpp)
+target_link_libraries(AxiomReleaseVerificationTests PRIVATE AxiomReleaseVerification)
+add_test(NAME AxiomReleaseVerificationTests COMMAND AxiomReleaseVerificationTests)
+add_test(NAME AxiomWindowsVerificationChecklist COMMAND AxiomWindowsVerification --checklist)
+add_executable(AxiomRuntimeTests tests/runtime_tests.cpp)
+target_link_libraries(AxiomRuntimeTests PRIVATE AxiomRuntime)
+add_test(NAME AxiomRuntimeTests COMMAND AxiomRuntimeTests)
+add_executable(AxiomReminderStoreTests tests/reminder_store_tests.cpp)
+target_link_libraries(AxiomReminderStoreTests PRIVATE AxiomReminders)
+add_test(NAME AxiomReminderStoreTests COMMAND AxiomReminderStoreTests)
+if(WIN32)
+add_executable(AxiomWindowsReleaseGatesTests
+tests/windows_release_gates_tests.cpp
+src/filesystem_watcher.cpp
+src/plugin_loader_win32.cpp
+)
+target_link_libraries(AxiomWindowsReleaseGatesTests PRIVATE
+AxiomIndex
+AxiomWatcherRecovery
+AxiomJournal
+AxiomLocalData
+AxiomPlugins
+AxiomActions
+AxiomDiagnostics
+)
+target_compile_features(AxiomWindowsReleaseGatesTests PRIVATE cxx_std_20)
+target_compile_definitions(AxiomWindowsReleaseGatesTests PRIVATE
+UNICODE
+_UNICODE
+WIN32_LEAN_AND_MEAN
+NOMINMAX
+_WIN32_WINNT=0x0A00
+)
+axiom_enable_warnings(AxiomWindowsReleaseGatesTests)
+add_dependencies(AxiomWindowsReleaseGatesTests AxiomHelloPlugin Axiom)
+add_test(NAME AxiomWindowsReleaseGatesTests COMMAND
+AxiomWindowsReleaseGatesTests
+${CMAKE_CURRENT_SOURCE_DIR}/samples/hello_plugin/hello.axp
+$<TARGET_FILE:AxiomHelloPlugin>
+$<TARGET_FILE:Axiom>
+)
+endif()
+endif()
+if(AXIOM_BUILD_BENCHMARKS)
+add_executable(AxiomIndexBenchmark benchmarks/file_index_benchmark.cpp)
+target_link_libraries(AxiomIndexBenchmark PRIVATE AxiomIndex)
+target_compile_features(AxiomIndexBenchmark PRIVATE cxx_std_20)
+axiom_enable_warnings(AxiomIndexBenchmark)
+endif()
