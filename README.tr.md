@@ -18,7 +18,9 @@ Projenin mühendislik odağı, arka planda sürekli çalışan bir masaüstü ar
 
 > **Proje bağlamı:** Axiom Desktop, lise yıllarımda geliştirdiğim bağımsız bir native Windows projesidir. Güvenilirlik iddiaları kaynak kod, otomatik testler ve yapılandırılmış Windows doğrulama kaydıyla sınırlandırılmıştır.
 
-![Axiom Desktop Release paletinde diag status komutunun sonucu](docs/assets/axiom-diag-status-release.png)
+Palet artık sade gri seçim tonları kullanır. Güncel ekran görüntüsü bekleniyor:
+görüntü alma aracı kayan araç penceresini ayrı hedef olarak seçemedi.
+Eski tanılama görüntüsü güncel arayüz gibi gösterilmemesi için kaldırıldı.
 
 *`Alt+Space` → `diag status` sonrasında çalışan Release uygulamasından alınmış
 gerçek ekran görüntüsü. Palet, komutun oturuma özgü yürütme tanılarını gösterir.*

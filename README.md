@@ -22,7 +22,9 @@ support bundles, and deterministic tests around those boundaries.
 > developed while I was a high-school student. Its reliability claims are backed
 > by the source, automated tests, and a structured Windows verification record.
 
-![Axiom Desktop Release palette showing the diag status command result](docs/assets/axiom-diag-status-release.png)
+The palette now uses restrained slate selection colors. A fresh screenshot is
+pending: the capture tool could not target its floating tool window. The older
+diagnostics screenshot is intentionally not shown as the current interface.
 
 *Real Release-build capture after `Alt+Space` → `diag status`. The palette shows
 the command's session-scoped execution diagnostics.*
