@@ -22,8 +22,30 @@ Palet artık sade gri seçim tonları kullanır. Güncel ekran görüntüsü bek
 görüntü alma aracı kayan araç penceresini ayrı hedef olarak seçemedi.
 Eski tanılama görüntüsü güncel arayüz gibi gösterilmemesi için kaldırıldı.
 
-*`Alt+Space` → `diag status` sonrasında çalışan Release uygulamasından alınmış
-gerçek ekran görüntüsü. Palet, komutun oturuma özgü yürütme tanılarını gösterir.*
+## Bu repoda geliştirilen mühendislik
+
+Komut paleti görünen giriş noktasıdır; işin önemli kısmı Windows olayları veya
+disk işlemleri beklenen sırayı izlemediğinde resident servisleri tutarlı tutmaktır.
+
+- **Native yaşam döngüsü:** Win32 kabuğu tray erişimini, global kısayolu ve
+  ikinci instance'tan mevcut sürece aktivasyon aktarımını uygular.
+- **Toparlanabilen dosya indeksi:** [watcher_resync.cpp](src/watcher_resync.cpp)
+  ve [index_scan_gate.cpp](src/index_scan_gate.cpp), dosya sistemi bildirim
+  kaybından sonra yeniden taramayı koordine eder. Generation korumaları eski
+  bir taramanın daha yeni toparlanma isteğini temizlemesini önler.
+- **Kesilen restore işlemleri:** [restore_transaction.cpp](src/restore_transaction.cpp)
+  ve [testleri](tests/restore_transaction_tests.cpp), işlem ilerlemesini açıkça
+  izler; kesilmiş yerel veri işlemleri başlangıçta ele alınabilir.
+- **İncelenebilir plugin güveni:** native kod yükleme; paket kimliği, hash ve
+  güven kontrollerinden ayrılır. Yerel koruma etkinse Windows DPAPI kullanılır;
+  bu, projeye özel yazılmış bir şifreleme algoritması değil OS hizmetidir.
+
+**Yöntemin bedeli:** C++20/Win32 gömülü web runtime'ı gerektirmeden doğrudan
+Windows entegrasyonu sağlar, fakat platforma özgü yaşam döngüsü işi getirir.
+Process içi plugin'ler güvenilen native koddur, sandbox değildir.
+[watcher_resync_tests.cpp](tests/watcher_resync_tests.cpp), toparlanma davranışını
+incelemek için somut bir giriş noktasıdır. Son yerel Release kontrolünde
+**30 CTest hedefi geçti**; bu regresyon kanıtıdır, güvenlik sertifikası değildir.
 
 ## Öne çıkanlar
 

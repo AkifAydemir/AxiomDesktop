@@ -26,8 +26,34 @@ The palette now uses restrained slate selection colors. A fresh screenshot is
 pending: the capture tool could not target its floating tool window. The older
 diagnostics screenshot is intentionally not shown as the current interface.
 
-*Real Release-build capture after `Alt+Space` → `diag status`. The palette shows
-the command's session-scoped execution diagnostics.*
+## Engineering work implemented in this repository
+
+The visible command palette is the entry point; much of the engineering is in
+keeping its resident services consistent when Windows events or disk operations
+do not follow the happy path.
+
+- **Native application lifecycle:** the Win32 shell implements tray access,
+  global hotkey activation and single-instance handoff rather than depending on
+  an embedded browser shell.
+- **Recoverable file indexing:**
+  [`watcher_resync.cpp`](src/watcher_resync.cpp) and
+  [`index_scan_gate.cpp`](src/index_scan_gate.cpp) coordinate recovery after
+  filesystem notification loss. Generation guards keep an older scan from
+  clearing a newer recovery request.
+- **Interrupted restore handling:**
+  [`restore_transaction.cpp`](src/restore_transaction.cpp) and its
+  [regression tests](tests/restore_transaction_tests.cpp) make restore progress
+  explicit so interrupted local-data operations can be handled at startup.
+- **Reviewable extension trust:** native plugin loading is separated from
+  package identity, hash and trust checks. Windows DPAPI is used where local
+  protection is enabled; it is an OS service, not custom cryptography.
+
+**Design trade-off:** native C++20/Win32 avoids a bundled web runtime and provides
+direct Windows integration, at the cost of platform-specific lifecycle work.
+In-process plugins remain trusted native code, not sandboxed extensions.
+[`watcher_resync_tests.cpp`](tests/watcher_resync_tests.cpp) is a concrete entry
+point for reviewing recovery behavior. The latest local Release check passed
+**30 CTest targets**; this is regression evidence, not security certification.
 
 ## Highlights
 
@@ -130,7 +156,7 @@ clean-machine installation remains a separate check.
 
 1. Start `Axiom.exe` and press `Alt+Space`. Type `?` to browse the command
    library.
-2. Run `diag status` to see the session-scoped result pictured above.
+2. Run `diag status` to inspect session-scoped execution diagnostics.
 3. Run `index status` to inspect the file index and watcher recovery state.
 4. Run `plugin status` and `data status` to inspect plugin trust and local-data
    privacy state without changing either.
