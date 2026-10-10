@@ -125,6 +125,7 @@ src/system_metrics.cpp
 src/plugin_loader_win32.cpp
 )
 target_compile_features(Axiom PRIVATE cxx_std_20)
+target_include_directories(Axiom PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_definitions(Axiom PRIVATE
 UNICODE
 _UNICODE

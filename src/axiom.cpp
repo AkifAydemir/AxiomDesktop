@@ -1,4 +1,5 @@
 #include "axiom.hpp"
+#include "resource.h"
 #include "journal_transfer.hpp"
 #include "support_bundle.hpp"
 #include "win32_handle.hpp"
@@ -2745,6 +2746,8 @@ void App::register_window_class() {
     window_class.cbSize = sizeof(window_class);
     window_class.lpfnWndProc = &App::window_proc_thunk;
     window_class.hInstance = instance_;
+    window_class.hIcon = LoadIconW(instance_, MAKEINTRESOURCEW(IDI_AXIOM));
+    window_class.hIconSm = window_class.hIcon;
     window_class.hCursor = LoadCursorW(nullptr, IDC_ARROW);
     window_class.hbrBackground = nullptr;
     window_class.lpszClassName = axiom_window_class_name;
@@ -2808,7 +2811,7 @@ void App::add_tray_icon() {
     data.uID = tray_icon_id;
     data.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
     data.uCallbackMessage = tray_callback_message;
-    data.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
+    data.hIcon = LoadIconW(instance_, MAKEINTRESOURCEW(IDI_AXIOM));
     wcsncpy_s(data.szTip, L"Axiom Desktop", _TRUNCATE);
     if (!Shell_NotifyIconW(NIM_ADD, &data)) {
         throw std::runtime_error{"Failed to create Axiom tray icon."};

@@ -19,6 +19,7 @@ try {
     foreach ($requiredFile in @('Axiom.exe')) {
         if (-not (Test-Path -LiteralPath (Join-Path $packageDir $requiredFile))) { throw "Missing package payload: $requiredFile" }
     }
+    & (Join-Path $PSScriptRoot 'check-icon.ps1') -IconPath 'src/icons/axiom.ico' -ExecutablePath (Join-Path $packageDir 'Axiom.exe')
     Compress-Archive -Path (Join-Path $packageDir '*') -DestinationPath ($packageDir + '.zip')
     Get-FileHash -LiteralPath ($packageDir + '.zip') -Algorithm SHA256
     Write-Host 'Portable preview created. Test on a clean Windows machine before publishing a release.'

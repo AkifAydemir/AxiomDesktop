@@ -1,6 +1,8 @@
 #include "resource.h"
 #include <windows.h>
 
+IDI_AXIOM ICON "icons/axiom.ico"
+
 IDR_AXIOM_VERSION VERSIONINFO
     FILEVERSION 0,16,0,0
     PRODUCTVERSION 0,16,0,0
