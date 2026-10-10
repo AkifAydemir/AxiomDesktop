@@ -75,15 +75,15 @@ struct PaletteThemeColors {
     switch (theme) {
     case AppTheme::light:
         return {RGB(246, 247, 249), RGB(255, 255, 255), RGB(30, 35, 43), RGB(102, 112, 133),
-                RGB(47, 111, 237),  RGB(220, 232, 255), RGB(23, 52, 98), RGB(20, 132, 84),
+                RGB(76, 88, 103),  RGB(226, 230, 235), RGB(30, 35, 43), RGB(20, 132, 84),
                 RGB(180, 108, 0),   RGB(196, 43, 28)};
     case AppTheme::dark:
         return {RGB(24, 26, 31),    RGB(31, 34, 40),   RGB(235, 238, 244), RGB(154, 162, 176),
-                RGB(112, 163, 255), RGB(56, 74, 105),  RGB(245, 248, 255), RGB(83, 201, 139),
+                RGB(162, 174, 190), RGB(54, 61, 70),  RGB(245, 248, 255), RGB(83, 201, 139),
                 RGB(245, 184, 85),  RGB(255, 112, 102)};
     case AppTheme::oled:
         return {RGB(0, 0, 0),       RGB(8, 8, 8),      RGB(242, 242, 242), RGB(145, 145, 145),
-                RGB(112, 170, 255), RGB(28, 48, 76),   RGB(255, 255, 255), RGB(88, 210, 142),
+                RGB(170, 180, 195), RGB(32, 36, 42),   RGB(255, 255, 255), RGB(88, 210, 142),
                 RGB(255, 190, 76),  RGB(255, 104, 104)};
     case AppTheme::graphite:
         return {RGB(35, 37, 41),    RGB(44, 47, 52),   RGB(235, 236, 238), RGB(159, 164, 171),
@@ -2816,6 +2816,13 @@ void App::add_tray_icon() {
     tray_icon_added_ = true;
     data.uVersion = NOTIFYICON_VERSION_4;
     Shell_NotifyIconW(NIM_SETVERSION, &data);
+    if (settings_.notifications_enabled) {
+        data.uFlags = NIF_INFO;
+        data.dwInfoFlags = NIIF_INFO | NIIF_NOSOUND;
+        wcscpy_s(data.szInfoTitle, L"Axiom Desktop is ready");
+        wcscpy_s(data.szInfo, L"Press Alt+Space to open the command palette. Type ? for help. Use the tray menu to exit.");
+        Shell_NotifyIconW(NIM_MODIFY, &data);
+    }
 }
 void App::remove_tray_icon() noexcept {
     if (!tray_icon_added_ || window_ == nullptr) {

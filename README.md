@@ -6,6 +6,8 @@
 
 [Türkçe](README.tr.md)
 
+[First successful session & troubleshooting](docs/GETTING_STARTED.md) · [Architecture](docs/ARCHITECTURE.md) · [Validation](docs/VALIDATION.md)
+
 Axiom Desktop is a native, local-first command center for Windows. A global
 `Alt+Space` palette brings file search, clipboard history, notes, reminders,
 automations, diagnostics, and trusted native plugins into one keyboard-driven
@@ -117,6 +119,12 @@ not arbitrary-code isolation.
 | [`tests/watcher_resync_tests.cpp`](tests/watcher_resync_tests.cpp) | A concrete recovery regression test. |
 
 ## A 60-second product tour
+
+For a portable Windows preview, the maintainer can run
+`powershell -NoProfile -File tools/package.ps1`. It builds/tests first, then bundles
+the executable, guides and sample source into a ZIP under `artifacts/`.
+The preview is unsigned and may need Microsoft's Visual C++ x64 runtime;
+clean-machine installation remains a separate check.
 
 1. Start `Axiom.exe` and press `Alt+Space`. Type `?` to browse the command
    library.

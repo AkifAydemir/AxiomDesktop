@@ -6,6 +6,12 @@
 
 [English](README.md)
 
+[İlk kullanım ve sorun giderme](docs/GETTING_STARTED.md) · [Son yerel doğrulama](docs/REVIEW_2026-10-10.md)
+
+Kaynak derleme/test: `powershell -NoProfile -File tools/check.ps1`.
+Taşınabilir önizleme ZIP'i üretme: `powershell -NoProfile -File tools/package.ps1`.
+Paketler imzasız önizlemedir; temiz bilgisayarda kurulum doğrulaması yapılmış sayılmaz.
+
 Axiom Desktop, Windows için native ve local-first bir komuta merkezidir. Global `Alt+Space` paleti; dosya arama, clipboard geçmişi, notlar, hatırlatmalar, otomasyonlar, tanılar ve güvenilen native plugin’leri klavyeyle kullanılan tek bir akışta toplar.
 
 Projenin mühendislik odağı, arka planda sürekli çalışan bir masaüstü aracının güvenilirliğidir: dosya sistemi değişikliklerinden toparlanma, atomik yerel veri işlemleri, açık plugin güven modeli, çökme sonrası restore işlemleri, saat değişiklikleri, mahremiyeti gözeten destek paketleri ve bu sınırları sınayan deterministik testler.

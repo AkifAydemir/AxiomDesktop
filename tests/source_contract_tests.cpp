@@ -43,6 +43,9 @@ void run_tests() {
     const std::filesystem::path root{AXIOM_SOURCE_DIR};
     const auto header = read_all(root / "src" / "axiom.hpp");
     const auto source = read_all(root / "src" / "axiom.cpp");
+    expect_contains(source, "Axiom Desktop is ready", "Startup discoverability notice missing");
+    expect_contains(source, "Press Alt+Space to open the command palette.", "Startup notice must explain how to open the palette");
+    expect_contains(source, "if (settings_.notifications_enabled)", "Startup notice must respect notification preferences");
     const auto plugin_api = read_all(root / "src" / "plugin_api.hpp");
     const auto plugin_loader = read_all(root / "src" / "plugin_loader_win32.cpp");
     const auto cmake = read_all(root / "CMakeLists.txt");
